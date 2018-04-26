@@ -133,7 +133,6 @@ void readcsv(FILE*fpcsv, sinhvien &sv, int &demsothich)
 		{
 			fseek(fpcsv, -1, SEEK_CUR);
 		}
-		_putws(sv.mota);
 	}
 	else
 	{
@@ -157,7 +156,6 @@ void readcsv(FILE*fpcsv, sinhvien &sv, int &demsothich)
 		{
 			fseek(fpcsv, -1, SEEK_CUR);
 		}
-		_putws(sv.mota);
 	}
 	// SO THICH 1 --------------------------------------------------------------------------------------------------
 	if (demsothich == 1)
@@ -175,7 +173,6 @@ void readcsv(FILE*fpcsv, sinhvien &sv, int &demsothich)
 			{
 				fseek(fpcsv, -1, SEEK_CUR);
 			}
-			_putws(sv.sothich1);
 		}
 		else
 		{
@@ -199,7 +196,6 @@ void readcsv(FILE*fpcsv, sinhvien &sv, int &demsothich)
 			{
 				fseek(fpcsv, -1, SEEK_CUR);
 			}
-			_putws(sv.sothich1);
 		}
 	}
 	// SO THICH 2 ----------------------------------------------------------------------------------------------
@@ -209,13 +205,11 @@ void readcsv(FILE*fpcsv, sinhvien &sv, int &demsothich)
 		if (ch1 == 34)
 		{
 			fwscanf(fpcsv, L"%[^\"]\"", &sv.sothich2);
-			_putws(sv.sothich2);
 		}
 		else
 		{
 			lui(fpcsv, ch1);
 			fwscanf(fpcsv, L"%[^\n]", &sv.sothich2);
-			_putws(sv.sothich2);
 		}
 	}
 }
@@ -299,6 +293,65 @@ void writehtml(FILE* &fphtml, FILE* fphtml_goc, sinhvien sv, int demsothich)
 				fseek(fphtml_goc, -1, SEEK_CUR);
 		}
 	}
+	fclose(fphtml);
+}
+void thongtinsinhvien(sinhvien sv, int demsothich, int stt)
+{
+	wprintf(L"Thông tin sinh viên %d", stt);
+	wprintf(L"\nMSSV: %ls", sv.mssv);
+	wprintf(L"\nHọ và tên: %ls", sv.name);
+	wprintf(L"\nKhoa: %ls", sv.khoa);
+	wprintf(L"\nNiên khóa: %d", sv.nienkhoa);
+	wprintf(L"\nNgày tháng năm sinh: %ls", sv.ngaysinh);
+	wprintf(L"\nLink hình ảnh cá nhân: %ls", sv.linkimage);
+	wprintf(L"\nEmail: %ls", sv.email);
+	wprintf(L"\nMô tả bản thân: %ls", sv.mota);
+	if (demsothich == 2)
+	{
+		wprintf(L"\nSở thích1: %ls", sv.sothich1);
+		wprintf(L"\nSở thích2: %ls", sv.sothich2);
+	}
+	else if (demsothich == 1)
+	{
+		wprintf(L"\nSở thích1: %ls", sv.sothich1);
+	}
+	else wprintf(L"\nKhông có sở thích");
+	wprintf(L"\n\n");
+}
+void tuychonxuatprofilepage(FILE*fpcsv, FILE*&fphtml, FILE*fphtml_goc, int stt)
+{
+	int stt_output;
+	wprintf(L"Nhập số thứ tự sinh viên cần xuất ra profile page \nhoặc nhập -1 để xuất tất cả: ");
+	do{
+		scanf("%d", &stt_output);
+		if (stt_output > stt || stt_output < -1 || stt_output == 0)
+		{
+			wprintf(L"\nKhông có sinh viên này, vui lòng nhập lại: ");
+		}
+	} while (stt_output>stt || stt_output<-1 || stt_output==0);
+	stt = 0;
+	while (1)
+	{
+		sinhvien sv;
+		int demsothich;
+		readcsv(fpcsv, sv, demsothich);
+		stt++;
+		if (stt_output == -1)
+		{
+			writehtml(fphtml, fphtml_goc, sv, demsothich);
+		}
+		else if (stt_output == stt)
+		{
+			writehtml(fphtml, fphtml_goc, sv, demsothich);
+			break;
+		}
+		rewind(fphtml_goc);
+		wint_t ch = fgetwc(fpcsv);
+		if (ch == 10)
+			continue;
+		else if (ch == WEOF)
+			break;
+	}
 }
 void main()
 {
@@ -315,12 +368,14 @@ void main()
 
 	if (fpcsv != NULL)
 	{
+		int stt = 0;
 		while (1)
 		{
 			sinhvien sv;
 			int demsothich;
 			readcsv(fpcsv, sv,demsothich);			// Sau khi ham nay` thuc hien, con tro dang dung cuoi hang`.
-			writehtml(fphtml, fphtml_goc, sv, demsothich);
+			stt++;
+			thongtinsinhvien(sv, demsothich, stt);
 			rewind(fphtml_goc);
 			wint_t ch = fgetwc(fpcsv);	// Sau khi fgetc, ch= ky tu xuong dong`=10(ASCII)  va`con tro se chuyen xuong dong ke tiep (neu co) . 
 										// Nguoc lai (neu khong co dong ke tiep) thi` fgetc se duoc ch= ky tu ket thuc= -1(ASCII)
@@ -329,11 +384,12 @@ void main()
 			else if (ch == WEOF)		// Ky tu ket thuc tap tin
 				break;
 		}
+		rewind(fpcsv);
+		tuychonxuatprofilepage(fpcsv, fphtml, fphtml_goc, stt);
 	}
 	else
 		return;
 
 	fclose(fpcsv);
-	fclose(fphtml);
 	fclose(fphtml_goc);
 }
