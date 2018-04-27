@@ -214,7 +214,7 @@ void readcsv(FILE*fpcsv, sinhvien &sv, int &demsothich)				// mã ASCII   34 = "
 		}
 	}
 }
-void writehtml(FILE* &fphtml, FILE* fphtml_goc, sinhvien sv, int demsothich)
+void writehtml(FILE* &fphtml, FILE* fphtml_goc, sinhvien sv, int demsothich, int tuychon[9])
 {
 	wchar_t name_htm[16];
 	for (int i = 0; i <= wcslen(sv.mssv); i++)
@@ -247,41 +247,74 @@ void writehtml(FILE* &fphtml, FILE* fphtml_goc, sinhvien sv, int demsothich)
 			}
 			else if (wcsstr(str, L"Họ và tên") != NULL)
 			{
-				fwprintf(fphtml, L"                                <li>Họ và tên: %ls</li>\n", sv.name);
+				if (tuychon[0] == 0)
+					fwprintf(fphtml, L"                                <li></li>\n");
+				else
+					fwprintf(fphtml, L"                                <li>Họ và tên: %ls</li>\n", sv.name);
 			}
 			else if (wcsstr(str, L"MSSV") != NULL)
 			{
-				fwprintf(fphtml, L"                                <li>MSSV: %ls</li>\n", sv.mssv);
+				if (tuychon[1] == 0)
+					fwprintf(fphtml, L"                                <li></li>\n");
+				else
+					fwprintf(fphtml, L"                                <li>MSSV: %ls</li>\n", sv.mssv);
 			}
 			else if (wcsstr(str, L"Sinh viên khoa") != NULL)
 			{
-				fwprintf(fphtml, L"                                <li>Sinh viên khoa: %ls - Khóa: %d</li>\n", sv.khoa, sv.nienkhoa);
+				if (tuychon[2] == 0)
+					fwprintf(fphtml, L"                                <li></li>\n");
+				else
+					fwprintf(fphtml, L"                                <li>Sinh viên khoa: %ls </li>\n", sv.khoa);
+			}
+			else if (wcsstr(str, L"Khóa") != NULL)
+			{
+				if (tuychon[3] == 0)
+					fwprintf(fphtml, L"                                <li></li>\n");
+				else
+					fwprintf(fphtml, L"                                <li>Khóa: %d </li>\n", sv.nienkhoa);
 			}
 			else if (wcsstr(str, L"Ngày sinh") != NULL)
 			{
-				fwprintf(fphtml, L"                                <li>Ngày sinh: %ls</li>\n", sv.ngaysinh);
+				if (tuychon[4] == 0)
+					fwprintf(fphtml, L"                                <li></li>\n");
+				else
+					fwprintf(fphtml, L"                                <li>Ngày sinh: %ls</li>\n", sv.ngaysinh);
 			}
 			else if (wcsstr(str, L"Email:") != NULL)
 			{
-				fwprintf(fphtml, L"                                <li>Email: %ls</li>\n", sv.email);
+				if (tuychon[5] == 0)
+					fwprintf(fphtml, L"                                <li></li>\n");
+				else
+					fwprintf(fphtml, L"                                <li>Email: %ls</li>\n", sv.email);
 			}
 			else if (wcsstr(str, L"Description") != NULL)
 			{
-				fwprintf(fphtml, L"                        <div class=\"Description\">%ls", sv.mota);
+				if (tuychon[8] == 0)
+					fwprintf(fphtml, L"                        <div class=\"Description\">");
+				else
+					fwprintf(fphtml, L"                        <div class=\"Description\">%ls", sv.mota);
 			}
 			else if (wcsstr(str, L"Sở thích1") != NULL)
 			{
-				if (demsothich == 1 || demsothich == 2)
-					fwprintf(fphtml, L"                                <li>%ls</li>\n", sv.sothich1);
-				else if (demsothich == 0)
+				if (tuychon[6] == 0)
 					fwprintf(fphtml, L"                                <li></li>\n");
+				else{
+					if (demsothich == 1 || demsothich == 2)
+						fwprintf(fphtml, L"                                <li>%ls</li>\n", sv.sothich1);
+					else if (demsothich == 0)
+						fwprintf(fphtml, L"                                <li></li>\n");
+				}
 			}
 			else if (wcsstr(str, L"Sở thích2") != NULL)
 			{
-				if (demsothich == 2)
-					fwprintf(fphtml, L"                                <li>%ls</li>\n", sv.sothich2);
-				else if (demsothich == 1 || demsothich == 0)
+				if (tuychon[7] == 0)
 					fwprintf(fphtml, L"                                <li></li>\n");
+				else{
+					if (demsothich == 2)
+						fwprintf(fphtml, L"                                <li>%ls</li>\n", sv.sothich2);
+					else if (demsothich == 1 || demsothich == 0)
+						fwprintf(fphtml, L"                                <li></li>\n");
+				}
 			}
 			else
 			{
@@ -319,7 +352,7 @@ void thongtinsinhvien(sinhvien sv, int demsothich, int stt)
 	else wprintf(L"\nKhông có sở thích");
 	wprintf(L"\n\n");
 }
-void tuychonxuatprofilepage(FILE*fpcsv, FILE*&fphtml, FILE*fphtml_goc, int stt)
+void tuychonxuatprofilepage(FILE*fpcsv, FILE*&fphtml, FILE*fphtml_goc, int stt, int tuychon[9])
 {	tt:
 	int stt_output=0;
 	wprintf(L"\nNhập số thứ tự sinh viên cần xuất ra profile page \nhoặc nhập 0 để xuất tất cả: ");
@@ -339,11 +372,11 @@ void tuychonxuatprofilepage(FILE*fpcsv, FILE*&fphtml, FILE*fphtml_goc, int stt)
 		stt_temp++;
 		if (stt_output == 0)
 		{
-			writehtml(fphtml, fphtml_goc, sv, demsothich);
+			writehtml(fphtml, fphtml_goc, sv, demsothich,tuychon);
 		}
 		else if (stt_output == stt_temp)
 		{
-			writehtml(fphtml, fphtml_goc, sv, demsothich);
+			writehtml(fphtml, fphtml_goc, sv, demsothich,tuychon);
 			break;
 		}
 		rewind(fphtml_goc);
@@ -377,12 +410,41 @@ void tuychonxuatprofilepage(FILE*fpcsv, FILE*&fphtml, FILE*fphtml_goc, int stt)
 		wprintf(L"Hoàn tất!!!\n"); 
 	}
 }
+
+void mangdanhdautuychon(int tuychon[9])
+{
+	int temp;
+	wprintf(L"Mặc định chương trình sẽ xuất profile với cấu hình đầy đủ\nNếu muốn chọn cấu hình theo ý mình vui lòng nhập 1, ngược lại nhập 0: ");
+	scanf("%d", &temp);
+	if (temp == 1){
+		wprintf(L"\nNhập 1 trước thông tin muốn hiển thị / Nhập 0 trước thông tin muốn ẩn\n");
+		wprintf(L"1. Họ và tên: ");
+		scanf("%d", &tuychon[0]);
+		wprintf(L"2. MSSV: ");
+		scanf("%d", &tuychon[1]);
+		wprintf(L"3. Khoa: ");
+		scanf("%d", &tuychon[2]);
+		wprintf(L"4. Khóa: ");
+		scanf("%d", &tuychon[3]);
+		wprintf(L"5. Ngày sinh: ");
+		scanf("%d", &tuychon[4]);
+		wprintf(L"6. Email: ");
+		scanf("%d", &tuychon[5]);
+		wprintf(L"7. Sở thích 1: ");
+		scanf("%d", &tuychon[6]);
+		wprintf(L"8. Sở thích 2: ");
+		scanf("%d", &tuychon[7]);
+		wprintf(L"9. Mô tả: ");
+		scanf("%d", &tuychon[8]);
+	}
+}
 void main()
 {
 	_setmode(_fileno(stdout), _O_U16TEXT);
 	FILE* fpcsv;
 	FILE* fphtml;
 	FILE* fphtml_goc;
+	int tuychon[9] = { 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
 	wchar_t* fpcsv_name = L"danhsachsinhvien.csv";
 	fpcsv = _wfopen(fpcsv_name, L"rt, ccs=UTF-8");		//Mo file CSV
@@ -402,14 +464,15 @@ void main()
 			thongtinsinhvien(sv, demsothich, stt);
 			rewind(fphtml_goc);
 			wint_t ch = fgetwc(fpcsv);	// Sau khi fgetc, ch= ky tu xuong dong`=10(ASCII)  va`con tro se chuyen xuong dong ke tiep (neu co) . 
-										// Nguoc lai (neu khong co dong ke tiep) thi` fgetc se duoc ch= ky tu ket thuc= -1(ASCII)
+										// Nguoc lai (neu khong co dong ke tiep) thi` fgetc se duoc ch= ky tu ket thuc= -1(ASCII) = WEOF
 			if (ch == 10)				// Ky tu xuong dong
 				continue;
 			else if (ch == WEOF)		// Ky tu ket thuc tap tin
 				break;
 		}
 		rewind(fpcsv);
-		tuychonxuatprofilepage(fpcsv, fphtml, fphtml_goc, stt);
+		mangdanhdautuychon(tuychon);
+		tuychonxuatprofilepage(fpcsv, fphtml, fphtml_goc, stt,tuychon);
 	}
 	else
 		return;
