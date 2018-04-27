@@ -3,6 +3,7 @@
 #include <wchar.h>
 #include <io.h>
 #include <fcntl.h>
+#include <stdlib.h>
 #pragma warning(disable:4996)
 typedef struct
 {
@@ -17,8 +18,8 @@ typedef struct
 	wchar_t sothich1[50];
 	wchar_t sothich2[50];
 }sinhvien;
-void lui(FILE*fpcsv, wchar_t ch1)		//ch1 lấy 1 kí tự làm con trỏ dịch chuyển tới vị trí tiếp theo, hàm lui() dùng để quay ngược lại vị trí trước khi fgetwc.
-{										// VD: Nếu chữ "am" sau khi fgetwc thi con trỏ dời tới chử 'm' có thể dùng hàm fseek lui về -1, nhưng chữ "âm" phải lui về -2, "ẩm" phải fseek về -3 ; do đó để tỏng quát ta dùng hàm lui()
+void lui(FILE*fpcsv, wchar_t ch1)		//ch1 fgetwc lấy 1 kí tự làm con trỏ dịch chuyển tới vị trí tiếp theo, hàm lui() dùng để quay ngược lại vị trí trước khi fgetwc.
+{										// VD: Nếu chữ "am" sau khi fgetwc thì con trỏ dời tới chử 'm' có thể dùng hàm fseek lui về -1, nhưng chữ "âm" phải lui về -2, "ẩm" phải fseek về -3 ; do đó để tổng quát ta viết hàm lui()
 	long byte = 0;
 	while (1)
 	{
@@ -36,7 +37,7 @@ void lui(FILE*fpcsv, wchar_t ch1)		//ch1 lấy 1 kí tự làm con trỏ dịch 
 	}
 	fseek(fpcsv, -byte, SEEK_CUR);
 }
-void readcsv(FILE*fpcsv, sinhvien &sv, int &demsothich)
+void readcsv(FILE*fpcsv, sinhvien &sv, int &demsothich)				// mã ASCII   34 = "	44 = ,		10 = \n
 {
 	wchar_t ch1 = fgetwc(fpcsv);
 	demsothich = 0;
@@ -286,7 +287,7 @@ void writehtml(FILE* &fphtml, FILE* fphtml_goc, sinhvien sv, int demsothich)
 			{
 				fwprintf(fphtml, L"%ls", str);
 			}
-			wint_t ch = fgetwc(fphtml_goc);//kiem tra da doc het hay chua, neu da doc het htmlgoc.htm thi` break; neu chua het thi doi con tro sang trai 1L(vi` khi getc con tro da~dich sang phai 1L)
+			wint_t ch = fgetwc(fphtml_goc); //kiem tra da doc het hay chua, neu da doc het htmlgoc.htm thi` break; neu chua het thi doi con tro sang trai 1L(vi` khi getc con tro da~dich sang phai 1L)
 			if (ch == WEOF)
 				break;
 			else
@@ -319,9 +320,9 @@ void thongtinsinhvien(sinhvien sv, int demsothich, int stt)
 	wprintf(L"\n\n");
 }
 void tuychonxuatprofilepage(FILE*fpcsv, FILE*&fphtml, FILE*fphtml_goc, int stt)
-{
-	int stt_output;
-	wprintf(L"Nhập số thứ tự sinh viên cần xuất ra profile page \nhoặc nhập 0 để xuất tất cả: ");
+{	tt:
+	int stt_output=0;
+	wprintf(L"\nNhập số thứ tự sinh viên cần xuất ra profile page \nhoặc nhập 0 để xuất tất cả: ");
 	do{
 		scanf("%d", &stt_output);
 		if (stt_output > stt || stt_output < 0)
@@ -329,18 +330,18 @@ void tuychonxuatprofilepage(FILE*fpcsv, FILE*&fphtml, FILE*fphtml_goc, int stt)
 			wprintf(L"\nKhông có sinh viên này, vui lòng nhập lại: ");
 		}
 	} while (stt_output > stt || stt_output < 0);
-	stt = 0;
+	int stt_temp = 0;
 	while (1)
 	{
 		sinhvien sv;
 		int demsothich;
 		readcsv(fpcsv, sv, demsothich);
-		stt++;
+		stt_temp++;
 		if (stt_output == 0)
 		{
 			writehtml(fphtml, fphtml_goc, sv, demsothich);
 		}
-		else if (stt_output == stt)
+		else if (stt_output == stt_temp)
 		{
 			writehtml(fphtml, fphtml_goc, sv, demsothich);
 			break;
@@ -351,6 +352,29 @@ void tuychonxuatprofilepage(FILE*fpcsv, FILE*&fphtml, FILE*fphtml_goc, int stt)
 			continue;
 		else if (ch == WEOF)
 			break;
+	}
+	rewind(fpcsv);
+	rewind(fphtml_goc);	
+	if (stt_output != 0)
+	{	
+		int temp;
+		do{
+			wprintf(L"\nNhập 1 để tiếp tục, 0 để dừng: ");
+			scanf("%d", &temp);
+			if (temp == 1)
+			{
+				goto tt;
+			}
+			else if (temp == 0)
+			{
+				wprintf(L"Hoàn tất!!!\n");
+				break;
+			}
+			else wprintf(L"Nhập lại!!!\n");
+		} while (temp != 1 && temp != 0);
+	}
+	else { 
+		wprintf(L"Hoàn tất!!!\n"); 
 	}
 }
 void main()
@@ -379,7 +403,7 @@ void main()
 			rewind(fphtml_goc);
 			wint_t ch = fgetwc(fpcsv);	// Sau khi fgetc, ch= ky tu xuong dong`=10(ASCII)  va`con tro se chuyen xuong dong ke tiep (neu co) . 
 										// Nguoc lai (neu khong co dong ke tiep) thi` fgetc se duoc ch= ky tu ket thuc= -1(ASCII)
-			if (ch == 10)			// Ky tu xuong dong
+			if (ch == 10)				// Ky tu xuong dong
 				continue;
 			else if (ch == WEOF)		// Ky tu ket thuc tap tin
 				break;
@@ -389,7 +413,9 @@ void main()
 	}
 	else
 		return;
-
+	
 	fclose(fpcsv);
 	fclose(fphtml_goc);
+	system("pause");
+	
 }
