@@ -321,14 +321,14 @@ void thongtinsinhvien(sinhvien sv, int demsothich, int stt)
 void tuychonxuatprofilepage(FILE*fpcsv, FILE*&fphtml, FILE*fphtml_goc, int stt)
 {
 	int stt_output;
-	wprintf(L"Nhập số thứ tự sinh viên cần xuất ra profile page \nhoặc nhập -1 để xuất tất cả: ");
+	wprintf(L"Nhập số thứ tự sinh viên cần xuất ra profile page \nhoặc nhập 0 để xuất tất cả: ");
 	do{
 		scanf("%d", &stt_output);
-		if (stt_output > stt || stt_output < -1 || stt_output == 0)
+		if (stt_output > stt || stt_output < 0)
 		{
 			wprintf(L"\nKhông có sinh viên này, vui lòng nhập lại: ");
 		}
-	} while (stt_output>stt || stt_output<-1 || stt_output==0);
+	} while (stt_output > stt || stt_output < 0);
 	stt = 0;
 	while (1)
 	{
@@ -336,7 +336,7 @@ void tuychonxuatprofilepage(FILE*fpcsv, FILE*&fphtml, FILE*fphtml_goc, int stt)
 		int demsothich;
 		readcsv(fpcsv, sv, demsothich);
 		stt++;
-		if (stt_output == -1)
+		if (stt_output == 0)
 		{
 			writehtml(fphtml, fphtml_goc, sv, demsothich);
 		}
