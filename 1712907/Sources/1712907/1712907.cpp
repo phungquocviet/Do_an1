@@ -7,16 +7,16 @@
 #pragma warning(disable:4996)
 typedef struct
 {
-	wchar_t mssv[10];
-	wchar_t name[30];
-	wchar_t khoa[30];
+	wchar_t mssv[11];
+	wchar_t name[31];
+	wchar_t khoa[31];
 	int nienkhoa;
-	wchar_t ngaysinh[10];
+	wchar_t ngaysinh[11];
 	wchar_t linkimage[1000];
 	wchar_t email[100];
-	wchar_t mota[1000];
-	wchar_t sothich1[50];
-	wchar_t sothich2[50];
+	wchar_t mota[1001];
+	wchar_t sothich1[101];
+	wchar_t sothich2[101];
 }sinhvien;
 void lui(FILE*fpcsv, wchar_t ch1)		//ch1 fgetwc lấy 1 kí tự làm con trỏ dịch chuyển tới vị trí tiếp theo, hàm lui() dùng để quay ngược lại vị trí trước khi fgetwc.
 {										// VD: Nếu chữ "am" sau khi fgetwc thì con trỏ dời tới chử 'm' có thể dùng hàm fseek lui về -1, nhưng chữ "âm" phải lui về -2, "ẩm" phải fseek về -3 ; do đó để tổng quát ta viết hàm lui()
@@ -384,10 +384,10 @@ void main()
 	FILE* fphtml;
 	FILE* fphtml_goc;
 
-	wchar_t* fpcsv_name = L"sinhvien.csv";
+	wchar_t* fpcsv_name = L"danhsachsinhvien.csv";
 	fpcsv = _wfopen(fpcsv_name, L"rt, ccs=UTF-8");		//Mo file CSV
 
-	wchar_t* fphtmlgoc_name = L"htmlgoc.htm";
+	wchar_t* fphtmlgoc_name = L"origin_html.htm";
 	fphtml_goc = _wfopen(fphtmlgoc_name, L"rt, ccs=UTF-8");		//Mo file htmlgoc.htm
 
 	if (fpcsv != NULL)
@@ -419,3 +419,4 @@ void main()
 	system("pause");
 	
 }
+// Phùng Quốc Việt	MSSV: 1712907	Lớp: 17CTT7
